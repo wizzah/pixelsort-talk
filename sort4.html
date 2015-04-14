@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+ <head>
+  <meta charset="UTF-8">
+  <title>title</title>
+ </head>
+ <body>
+  <script>
+  window.onload = function() {
+
+    function Pixel (r, g, b, a) {
+      this.r = r;
+      this.g = g;
+      this.b = b;
+      this.a = a;
+    }
+
+    var obj_list = function(flat_array) {
+      new_obj = [];
+
+      for(i = 0; i < flat_array.length; i += 4) {
+        new_obj.push(new Pixel(
+            flat_array[i],
+            flat_array[i + 1],
+            flat_array[i + 2],
+            flat_array[i + 3]
+          ));
+      }
+
+      return new_obj
+    };
+
+    function imageLoaded() {
+        var element = document.getElementById("myCanvas");
+        var c = element.getContext("2d");
+
+        // read the width and height of the canvas
+        element.width = this.width;
+        element.height = this.height;
+        var width = element.width;
+        var height = element.height;
+
+        // stamp the image on the left of the canvas:
+        c.drawImage(im, 0, 0);
+
+        // get all canvas pixel data
+        var imageData = c.getImageData(0, 0, width, height);
+        var oldImageData = imageData.data;
+        var old_pixelSequence = obj_list(imageData.data)
+
+        //process
+        var new_pixelSequence = channel_shuffle(old_pixelSequence, width);
+        imageData.data.set(unwrap(new_pixelSequence));
+        c.putImageData(imageData, 0, 0);
+    }
+
+    function channel_shuffle(list, width) {
+
+      for(var i = 0; i < list.length-1; i++) {
+
+          list[i].b += 50;
+
+          //comparison
+          if (list[i].b > list[i].g) {
+            list[i].r = list[i].b;
+          } else {
+            list[i].b = list[i].g;
+          }
+
+          //ranges
+          if((list[i].g > 100) && (list[i].b > 200)) {
+
+            if(i+5 < list.length) {
+              list[i+5].r = 47;
+              list[i+5].g = 32;
+              list[i+5].b = 140;
+            }
+
+          }
+
+      }
+      return list
+    }
+
+
+    function bubblesort(list, channel) {
+      list.sort(function(a, b) {
+        if(a[channel] > b[channel]) {
+          return 1;
+        }
+
+        if (a[channel] < b[channel]) {
+          return -1;
+        }
+
+        return 0;
+      });
+
+      return list
+    }
+
+    function unwrap(data) {
+      unwrapped_list = [];
+
+      for(var i = 0; i < data.length; i++) {
+        unwrapped_list.push(data[i].r);
+        unwrapped_list.push(data[i].g);
+        unwrapped_list.push(data[i].b);
+        unwrapped_list.push(data[i].a);
+      }
+
+      return unwrapped_list
+    }
+
+
+    im = new Image();
+    im.onload = imageLoaded;
+    im.src = "bees.jpg";
+  };
+  </script>
+<canvas id="myCanvas" width="450" height="283"></canvas>
+<a href="sort5.html">Next</a>
+ </body>
+</html>
